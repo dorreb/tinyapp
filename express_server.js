@@ -1,9 +1,10 @@
 const express = require("express");
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.use(express.urlencoded({ extended: true }));
-
+app.use(cookieParser());
 app.set("view engine", "ejs");
 
 app.listen(PORT, () => {
@@ -17,7 +18,10 @@ const urlDatabase = {
 
 // renders the urls_index template with the urlDatabase passed as a template variable
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render('urls_index', templateVars);
 });
 
@@ -38,12 +42,17 @@ app.post("/login", (req, res) => {
 
 // renders the urls_new template
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = { username: req.cookies["username"] };
+  res.render('urls_new', templateVars);
 });
 
 // renders the urls_show template with the url id and long url passed as a template variable
 app.get('/urls/:id', (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"]
+  };
   res.render('urls_show', templateVars);
 });
 
