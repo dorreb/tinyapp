@@ -46,6 +46,10 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
 // renders the urls_new template
 app.get('/urls/new', (req, res) => {
   const templateVars = { username: req.cookies["username"] };
