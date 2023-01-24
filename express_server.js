@@ -21,17 +21,24 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
-// renders the urls_new template
-app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
-});
-
 // listens for a post request to the "/urls" path, generates a random short url,
 // assigns the long url to the short url in the urlDatabase and redirects to the "/urls/shortURL"
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
+});
+
+// handles a post request to /login and sets a cookie
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie("username", username);
+  res.redirect("/urls");
+});
+
+// renders the urls_new template
+app.get('/urls/new', (req, res) => {
+  res.render('urls_new');
 });
 
 // renders the urls_show template with the url id and long url passed as a template variable
