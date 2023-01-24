@@ -33,10 +33,16 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// handles a post request to /login and sets a cookie
+// listens for a post request to /login and sets a cookie
 app.post("/login", (req, res) => {
   const username = req.body.username;
   res.cookie("username", username);
+  res.redirect("/urls");
+});
+
+// listens for a POST request to the path "/logout" and clears the "username" cookie, then redirects the user back to the "/urls" page
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
   res.redirect("/urls");
 });
 
