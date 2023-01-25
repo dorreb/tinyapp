@@ -2,8 +2,9 @@ const express = require("express");
 const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
+const bodyParser = require("body-parser");
 
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
@@ -16,11 +17,27 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-// renders the urls_index template with the urlDatabase passed as a template variable
+//Object for storing users
+const users = {};
+
+//Endpoint for handling registration form data
+app.post("/register", (req, res) => {
+  const newUser = {
+    id: generateRandomString(),
+    email: req.body.email,
+    password: req.body.password
+  };
+  users[newUser.id] = newUser;
+  res.cookie("user_id", newUser.id);
+  res.redirect("/urls");
+});
+
+// renders the urls_index template with the urlDatabase and user object passed as template variables
 app.get('/urls', (req, res) => {
+  const user = users[req.cookies.user_id];
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: user
   };
   res.render('urls_index', templateVars);
 });
@@ -33,16 +50,20 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-// listens for a post request to /login and sets a cookie
+// listens for a post request to /login and sets a user_id cookie
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie("username", username);
-  res.redirect("/urls");
+  const user = findUserByEmail(req.body.email);
+  if (user && user.password === req.body.password) {
+    res.cookie("user_id", user.id);
+    res.redirect("/urls");
+  } else {
+    res.status(401).send("Invalid email or password");
+  }
 });
 
-// listens for a POST request to the path "/logout" and clears the "username" cookie, then redirects the user back to the "/urls" page
+// listens for a POST request to the path "/logout" and clears the "user_id" cookie, then redirects the user back to the "/urls" page
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -50,18 +71,19 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
-// renders the urls_new template
 app.get('/urls/new', (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const user = users[req.cookies.user_id];
+  const templateVars = { user: user };
   res.render('urls_new', templateVars);
 });
 
-// renders the urls_show template with the url id and long url passed as a template variable
+// renders the urls_show template with the url id, long url and user object passed as template variables
 app.get('/urls/:id', (req, res) => {
+  const user = users[req.cookies.user_id];
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
+    user: user
   };
   res.render('urls_show', templateVars);
 });
@@ -110,4 +132,14 @@ function generateRandomString() {
     randomString += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
   }
   return randomString;
+}
+
+//function for finding a user by email
+function findUserByEmail(email) {
+  for (const id in users) {
+    if (users[id].email === email) {
+      return users[id];
+    }
+  }
+  return null;
 }
