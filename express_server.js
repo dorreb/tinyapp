@@ -35,13 +35,23 @@ app.get('/urls', (req, res) => {
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
+  const userId = req.cookies.user_id;
+  if (userId && users[userId]) {
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(401).send("You must be logged in to shorten URLs. Please <a href='/login'>log in</a>.");
+  }
+
 });
 
 app.get('/urls/new', (req, res) => {
-  const user = users[req.cookies.user_id];
-  const templateVars = { user: user };
-  res.render('urls_new', templateVars);
+  if (req.cookies.user_id) {
+    const user = users[req.cookies.user_id];
+    const templateVars = { user: user };
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
 
 // renders the urls_show template with the url id, long url and user object passed as template variables
@@ -58,6 +68,9 @@ app.get('/urls/:id', (req, res) => {
 //redirects the short url to the corresponding long url
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
+  if (!longURL) {
+    return res.status(404).send("Shortened URL not found. Click <a href='/urls'>here</a> to go back to URLS");
+  }
   res.redirect(longURL);
 });
 
@@ -79,7 +92,11 @@ app.post("/urls/:id/update", (req, res) => {
 app.get("/register", (req, res) => {
   const user = users[req.cookies.user_id];
   const templateVars = { user: user };
-  res.render("register", templateVars);
+  if (req.cookies.user_id) {
+    res.redirect("urls");
+  } else {
+    res.render("register", templateVars);
+  }
 });
 
 
@@ -95,7 +112,7 @@ app.post("/register", (req, res) => {
   // check if email already exists in users object
   let existingUser = findUserByEmail(email);
   if (existingUser) {
-    return res.status(400).send("Email already registered. Please choose a different email or log in.");
+    return res.status(400).send("Email already registered. Please choose a different <a href='/register'>email</a> or <a href='/login'>login</a>");
   }
   // create new user object
   let userId = generateRandomString();
@@ -111,7 +128,11 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   const user = users[req.cookies.user_id];
   const templateVars = { user: user };
-  res.render("login", templateVars);
+  if (req.cookies.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.render("login", templateVars);
+  }
 });
 
 // listens for a post request to /login and sets a user_id cookie
