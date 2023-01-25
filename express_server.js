@@ -2,11 +2,11 @@ const express = require("express");
 const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
-const bodyParser = require("body-parser");
+const bodyParser = require("body-parser"); // remove this line
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.set("view engine", "ejs");
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true })); //change to express.urlencoded
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -22,13 +22,30 @@ const users = {};
 
 //Endpoint for handling registration form data
 app.post("/register", (req, res) => {
-  const newUser = {
-    id: generateRandomString(),
-    email: req.body.email,
-    password: req.body.password
+  let email = req.body.email;
+  let password = req.body.password;
+
+  // check if email or password is empty
+  if (!email || !password) {
+    return res.status(400).send("Email or password cannot be empty.");
+  }
+
+  // check if email already exists in users object
+  for (let userId in users) {
+    if (users[userId].email === email) {
+      return res.status(400).send("Email already registered. Please choose a different email or log in.");
+    }
+  }
+
+  // create new user object
+  let userId = generateRandomString();
+  users[userId] = {
+    id: userId,
+    email: email,
+    password: password
   };
-  users[newUser.id] = newUser;
-  res.cookie("user_id", newUser.id);
+
+  res.cookie("user_id", userId);
   res.redirect("/urls");
 });
 
