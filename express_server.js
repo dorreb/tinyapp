@@ -1,4 +1,5 @@
 const express = require("express");
+const { generateRandomString, findUserByEmail, users } = require('./tinyAppHelper');
 const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -13,8 +14,6 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-//Object for storing users
-const users = {};
 
 // renders the default page
 app.get("/", (req, res) => {
@@ -94,10 +93,9 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email or password cannot be empty.");
   }
   // check if email already exists in users object
-  for (let userId in users) {
-    if (users[userId].email === email) {
-      return res.status(400).send("Email already registered. Please choose a different email or log in.");
-    }
+  let existingUser = findUserByEmail(email);
+  if (existingUser) {
+    return res.status(400).send("Email already registered. Please choose a different email or log in.");
   }
   // create new user object
   let userId = generateRandomString();
@@ -119,19 +117,21 @@ app.get("/login", (req, res) => {
 // listens for a post request to /login and sets a user_id cookie
 app.post("/login", (req, res) => {
   const user = findUserByEmail(req.body.email);
-  if (user && user.password === req.body.password) {
-    res.cookie("user_id", user.id);
-    res.redirect("/urls");
-  } else {
-    res.status(401).send("Invalid email or password");
+  if (!user) {
+    return res.status(403).send("A user with that email cannot be found. Click <a href='/register'>here</a> to register.");
   }
+  if (user.password !== req.body.password) {
+    return res.status(403).send("Incorrect password. Click <a href='/login'>here</a> to try again.");
+  }
+  res.cookie("user_id", user.id);
+  res.redirect("/urls");
 });
 
 
 // listens for a POST request to the path "/logout" and clears the "user_id" cookie, then redirects the user back to the "/urls" page
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 
@@ -154,27 +154,3 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-
-
-// function to generate a random string
-function generateRandomString() {
-  let randomString = "";
-  const possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (let i = 0; i < 6; i++) {
-    randomString += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
-  }
-  return randomString;
-}
-
-//function for finding a user by email
-function findUserByEmail(email) {
-  for (const id in users) {
-    if (users[id].email === email) {
-      return users[id];
-    }
-  }
-  return null;
-}
