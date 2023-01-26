@@ -1,12 +1,13 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const { generateRandomString, findUserByEmail, users } = require('./tinyAppHelper');
 var cookieSession = require('cookie-session');
 const app = express();
 const PORT = 8080; // default port 8080
 
+const { generateRandomString, findUserByEmail } = require('./tinyAppHelper');
 
 app.set("view engine", "ejs");
+
 app.use(express.urlencoded({ extended: true })); //change to express.urlencoded
 app.use(cookieSession({
   name: 'session',
@@ -14,18 +15,11 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
+const users = {};
 
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "aJ48IW"
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: 'aJ48IW'
-  }
-};
+const urlDatabase = {};
 
+/// Routes
 
 // renders the default page
 app.get("/", (req, res) => {
@@ -121,23 +115,36 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 
-// updates the long url of a short url in the urlDatabase
-app.post("/urls/:id/update", (req, res) => {
-  // check if user is logged in
-  if (!req.session.user_id) {
-    return res.status(401).send("Please log in to access URLS.");
-  }
-  // check if user owns the URL
-  const shortURL = req.params.id;
-  const url = urlDatabase[shortURL];
-  if (!url || url.userID !== req.session.user_id) {
-    return res.status(401).send("You do not have permission to edit this URL");
-  }
-  // if user is logged in and owns the URL, update it
-  urlDatabase[req.params.id] = { longURL: req.body.longURL };
-  res.redirect("/urls");
-});
+// // updates the long url of a short url in the urlDatabase
+// app.post("/urls/:id/update", (req, res) => {
+//   // check if user is logged in
+//   if (!req.session.user_id) {
+//     return res.status(401).send("Please log in to access URLS.");
+//   }
+//   // check if user owns the URL
+//   const shortURL = req.params.id;
+//   const url = urlDatabase[shortURL];
+//   if (!url || url.userID !== req.session.user_id) {
+//     return res.status(401).send("You do not have permission to edit this URL");
+//   }
+//   // if user is logged in and owns the URL, update it
+//   urlDatabase[req.params.id] = { longURL: req.body.longURL };
+//   res.redirect("/urls");
+// });
 
+app.post("/urls/:id/update", (req, res) => {
+  const userID = req.session.user_id;
+  console.log(urlDatabase);
+  const userUrls = urlsForUser(userID, urlDatabase);
+  if (Object.keys(userUrls).includes(req.params.id)) {
+    const shortURL = req.params.id;
+    urlDatabase[shortURL].longURL = req.body.longURL;
+    console.log(urlDatabase);
+    res.redirect('/urls');
+  } else {
+    res.status(401).send("You do not have authorization to edit this short URL.");
+  }
+});
 
 
 app.get("/register", (req, res) => {
@@ -234,6 +241,8 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
 
 // Function to filter URLs by user ID
 function urlsForUser(id) {
