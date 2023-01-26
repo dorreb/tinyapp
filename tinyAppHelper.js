@@ -1,7 +1,3 @@
-//Object for storing users
-const users = {};
-
-
 // function to generate a random string
 function generateRandomString() {
   let randomString = "";
@@ -14,24 +10,15 @@ function generateRandomString() {
 }
 
 //function for finding a user by email
-function findUserByEmail(email) {
-  for (const id in users) {
-    if (users[id].email === email) {
-      return users[id];
+function findUserByEmail(email, database) {
+  for (const user in database) {
+    if (database[user].email === email) {
+      return database[user].id;
     }
   }
   return null;
 }
 
-// Function to filter URLs by user ID
-function urlsForUser(id) {
-  const userUrls = {};
-  for (let shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      filteredURLs[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return userUrls;
-}
 
-module.exports = { generateRandomString, findUserByEmail, urlsForUser, users };
+
+module.exports = { generateRandomString, findUserByEmail };
