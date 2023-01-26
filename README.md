@@ -10,13 +10,13 @@ This project was created and published by me as part of my learnings at Lighthou
 
 <p>This is the login page</p>
 
-<img src = "docs/login-page.png" width = 400 hight = 300 >
+<img src = "docs/login-page.png" width = 500 height = 400 >
 
 <br>
 
 <p>This is the urls page</p>
 
-<img src = "docs/urls-page.png" >
+<img src = "docs/urls-page.png" width = 500 height = 400 >
 
 ![](urls-page.png)
 
