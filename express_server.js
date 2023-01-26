@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const { generateRandomString, findUserByEmail, users } = require('./tinyAppHelper');
 const cookieParser = require('cookie-parser');
 const app = express();
@@ -162,13 +163,17 @@ app.post("/register", (req, res) => {
   if (existingUser) {
     return res.status(400).send("Email already registered. Please choose a different <a href='/register'>email</a> or <a href='/login'>login</a>");
   }
+
+  // hash the password
+  const hashedPassword = bcrypt.hashSync(password, 10);
   // create new user object
   let userId = generateRandomString();
   users[userId] = {
     id: userId,
     email: email,
-    password: password
+    password: hashedPassword
   };
+  console.log(users);
   res.cookie("user_id", userId);
   res.redirect("/urls");
 });
@@ -191,7 +196,7 @@ app.post("/login", (req, res) => {
   if (!user) {
     return res.status(403).send("A user with that email cannot be found. Click <a href='/register'>here</a> to register.");
   }
-  if (user.password !== req.body.password) {
+  if (!bcrypt.compareSync(req.body.password, user.password)) {
     return res.status(403).send("Incorrect password. Click <a href='/login'>here</a> to try again.");
   }
   res.cookie("user_id", user.id);
