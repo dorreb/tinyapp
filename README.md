@@ -10,7 +10,7 @@ This project was created and published by me as part of my learnings at Lighthou
 
 <p>This is the login page</p>
 
-<img src = "docs/login-page-medium.jp" width = auto height = 400 >
+<img src = "docs/login-page-medium.png" width = auto height = 400 >
 
 <br>
 
