@@ -1,6 +1,7 @@
 //Object for storing users
 const users = {};
 
+
 // function to generate a random string
 function generateRandomString() {
   let randomString = "";
@@ -22,4 +23,15 @@ function findUserByEmail(email) {
   return null;
 }
 
-module.exports = { generateRandomString, findUserByEmail, users };
+// Function to filter URLs by user ID
+function urlsForUser(id) {
+  const userUrls = {};
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      filteredURLs[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userUrls;
+}
+
+module.exports = { generateRandomString, findUserByEmail, urlsForUser, users };
