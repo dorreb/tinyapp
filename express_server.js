@@ -50,7 +50,6 @@ app.get('/urls', (req, res) => {
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.cookies.user_id };
-  console.log(urlDatabase);
   res.redirect(`/urls`);
 });
 
@@ -79,6 +78,16 @@ app.get('/urls/:id', (req, res) => {
 
 //redirects the short url to the corresponding long url
 app.get("/u/:id", (req, res) => {
+  // check if user is logged in
+  if (!req.cookies.user_id) {
+    return res.status(401).send("Please log in to access URLS. Click <a href='/login'>here</a> to login");
+  }
+  // check if user owns the URL
+  const shortURL = req.params.id;
+  const url = urlDatabase[shortURL];
+  if (!url || url.userID !== req.cookies.user_id) {
+    return res.status(401).send("Shortened URL not found. Click <a href='/urls'>here</a> to go back to URLS");
+  }
   const longURL = urlDatabase[req.params.id] && urlDatabase[req.params.id].longURL;
   if (!longURL) {
     return res.status(404).send("Shortened URL not found. Click <a href='/urls'>here</a> to go back to URLS");
