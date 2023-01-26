@@ -1,10 +1,24 @@
 # TinyApp for LHL
 
-A web application that allows users to shorten long URL's
+TinyApp is a web application built with Node and Express that allows users to shorten long URL's
 
 # Purpose
 
 This project was created and published by me as part of my learnings at Lighthouse Labs.
+
+## UI
+
+<p>This is the login page</p>
+
+<img src = "docs/login-page.png" width = 400 hight = 300 >
+
+<br>
+
+<p>This is the urls page</p>
+
+<img src = "docs/urls-page.png" width = 400 hight = 300 >
+
+![](urls-page.png)
 
 **Dependencies**
 Node.js
