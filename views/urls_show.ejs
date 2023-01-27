@@ -16,18 +16,22 @@
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= urlDatabase[id].longURL %></h5>
-        <p class="card-text">
-          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
-        </p>
+        <% if (!user) { %>
+          <p>This link is not in your personal inventory. Please <a href="/login" class="alert-link">login</a> or <a href="/register" class="alert-link">register</a> to view your personal collection of Short URLs.</p>
+          </div>
+        <% } else if (user.id !== urlUserID) { %>
+          <p>This link is not in your personal inventory.</p>         
+        <% } %>
+        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <p class="card-text">Short URL ID: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
       <div class="card-footer text-muted">
         <tr>
           <th scope="col"><b>Edit</b></th>
           </tr>
-      <form method="post" action="/urls/<%= id %>/update">
-        <label for="longURL">New URL:</label>
-        <input type="text" name="longURL" value="<%= longURL %>">
+      <form method="post" action="/urls/<%= shortURL %>/update">
+        <label for="newURL">New URL:</label>
+        <input type="text" name="newURL" value="<%= longURL %>">
         <input type="submit" value="Submit">
       </form>
     </div>
