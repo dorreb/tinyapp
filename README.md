@@ -8,7 +8,7 @@ This project was created and published by me as part of my learnings at Lighthou
 
 ## User Interface
 
-<p>This login page</p>
+<p>The login page</p>
 
 <img src = "docs/login-page.png" width = auto height = 400 >
 
